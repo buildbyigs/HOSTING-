@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GASIMA HOSTING - Cloud Infrastructure Platform</title>
+    <style>
+        :root {
+            --bg: #101010;
+            --surface: #1a1a1a;
+            --surface-alt: #222222;
+            --border: #333333;
+            --border-highlight: #4a4a4a;
+            --text-dim: #666666;
+            --text-main: #8a8a8a;
+            --text-bright: #b3b3b3;
+            --accent: #5e6b55;
+            --accent-hover: #6e7c65;
+            --danger: #7a4646;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            background-image: 
+                linear-gradient(var(--surface) 1px, transparent 1px),
+                linear-gradient(90deg, var(--surface) 1px, transparent 1px);
+            background-size: 30px 30px;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 20px;
+            min-height: 100vh;
+        }
+
+        .block {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            box-shadow: 6px 6px 0px var(--border);
+            padding: 20px;
+            position: relative;
+        }
+
+        .block::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: var(--border-highlight);
+        }
+
+        /* Sidebar Nav */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .brand {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--text-bright);
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+        
+        .brand span {
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .nav-btn {
+            background: transparent;
+            color: var(--text-main);
+            border: 2px solid var(--border);
+            padding: 12px 15px;
+            text-align: left;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.15s ease;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: var(--text-dim);
+            color: var(--bg);
+            border-color: var(--text-dim);
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0px var(--border);
+        }
+
+        /* Marquee */
+        .marquee-container {
+            grid-column: 1 / -1;
+            background: var(--surface-alt);
+            border: 2px solid var(--border);
+            padding: 10px;
+            overflow: hidden;
+            white-space: nowrap;
+            color: var(--accent);
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 25s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Main View System */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .section-title {
+            color: var(--text-bright);
+            font-size: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Gauge Status */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--surface-alt);
+            padding: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .circle-wrap {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+        }
+
+        .circle-wrap svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .circle-bg {
+            fill: none;
+            stroke: var(--bg);
+            stroke-width: 8;
+        }
+
+        .circle-progress {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 8;
+            stroke-dasharray: 220;
+            stroke-dashoffset: 220;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .circle-text {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--text-bright);
+        }
+
+        .status-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        /* VPS Cards */
+        .vps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .vps-card {
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .vps-name { color: var(--text-bright); font-weight: bold; font-size: 1.1rem; }
+        .vps-specs { font-size: 0.8rem; color: var(--text-main); line-height: 1.6; }
+        .vps-stock { font-size: 0.75rem; color: var(--accent); padding: 4px 8px; border: 1px solid var(--border); display: inline-block; width: fit-content; }
+        .vps-price { font-size: 1.1rem; color: var(--text-bright); margin-top: auto; }
+        
+        button.action-btn {
+            background: var(--text-dim);
+            color: var(--bg);
+            border: none;
+            padding: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+        button.action-btn:hover { background: var(--text-bright); }
+
+        /* Form UI */
+        .form-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input, select {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            color: var(--text-bright);
+            padding: 10px;
+            font-family: inherit;
+            outline: none;
+            width: 100%;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--text-dim);
+        }
+
+        /* Log Terminals */
+        .terminal {
+            background: #080808;
+            border: 1px solid var(--border);
+            padding: 12px;
+            height: 180px;
+            overflow-y: auto;
+            font-size: 0.75rem;
+            color: var(--accent);
+            line-height: 1.5;
+        }
+
+        /* Table Design */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: var(--surface-alt);
+            color: var(--text-bright);
+        }
+
+        /* Modal Overlay */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-body {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            width: 450px;
+            padding: 25px;
+            box-shadow: 8px 8px 0px #000;
+        }
+
+        @media (max-width: 900px) {
+            .app-container { grid-template-columns: 1fr; }
+            .grid-2, .vps-grid { grid-template-columns: 1fr; }
+            .status-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Running Notification Header -->
+        <div class="marquee-container">
+            <div class="marquee-content">
+                [SYSTEM ACTIVE] CLUSTER ID-JKT-1 ONLINE // ALL TUNNELS SYNCHRONIZED // ANTI-DDOS PROTECTION LAYER-7 ENABLED // KERNEL 6.8.0-GASIMA // NO DOWNTIME DETECTED
+            </div>
+        </div>
+
+        <!-- Main Navigation Bar -->
+        <aside class="sidebar block">
+            <div class="brand">
+                GASIMA HOSTING
+                <span>v2.4 Pro Console</span>
+            </div>
+            <button class="nav-btn active" onclick="switchTab('dashboard', this)">Dashboard</button>
+            <button class="nav-btn" onclick="switchTab('vps', this)">List VPS</button>
+            <button class="nav-btn" onclick="switchTab('domain', this)">Cari Domain</button>
+            <button class="nav-btn" onclick="switchTab('finance', this)">Top Up / Saldo</button>
+            <button class="nav-btn" onclick="switchTab('tunnel', this)">Support Tunnel</button>
+            <button class="nav-btn" onclick="switchTab('settings', this)">Pengaturan</button>
+
+            <div style="margin-top: auto; padding-top: 15px; border-top: 2px solid var(--border);">
+                <div style="font-size: 0.75rem; color: var(--text-dim);">SALDO TERSEDIA</div>
+                <div style="color: var(--text-bright); font-size: 1.1rem; font-weight: bold; margin-top: 2px;" id="sidebar-balance">Rp 450.000</div>
+            </div>
+        </aside>
+
+        <!-- View Display Area -->
+        <main class="main-content">
+            
+            <!-- TAB 1: DASHBOARD -->
+            <div id="tab-dashboard" class="tab-content active">
+                <section class="block">
+                    <div class="section-title">
+                        <span>Node Status (ID-JKT DataCenter)</span>
+                        <span style="color: var(--accent); font-size: 0.8rem;">● OPERATIONAL</span>
+                    </div>
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <div class="circle-wrap">
+                                <svg><circle class="circle-bg" cx="40" cy="40" r="35"></circle><circle class="circle-progress" id="cpu-ring" cx="40" cy="40" r="35"></circle></svg>
+                                <div class="circle-text" id="cpu-val">0%</div>
+                            </div>
+                            <div class="status-label">CPU Load</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="circle-wrap">
+                                <svg><circle class="circle-bg" cx="40" cy="40" r="35"></circle><circle class="circle-progress" id="ram-ring" cx="40" cy="40" r="35"></circle></svg>
+                                <div class="circle-text" id="ram-val">0%</div>
+                            </div>
+                            <div class="status-label">RAM Usage</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="circle-wrap">
+                                <svg><circle class="circle-bg" cx="40" cy="40" r="35"></circle><circle class="circle-progress" id="disk-ring" cx="40" cy="40" r="35"></circle></svg>
+                                <div class="circle-text" id="disk-val">0%</div>
+                            </div>
+                            <div class="status-label">NVMe I/O</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="circle-wrap">
+                                <svg><circle class="circle-bg" cx="40" cy="40" r="35"></circle><circle class="circle-progress" id="net-ring" cx="40" cy="40" r="35"></circle></svg>
+                                <div class="circle-text" id="net-val">0%</div>
+                            </div>
+                            <div class="status-label">Network Traffic</div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="grid-2">
+                    <section class="block">
+                        <div class="section-title">Console Deployment Logs</div>
+                        <div class="terminal" id="term-logs">
+                            <p>> [INIT] Kernel GASIMA ready...</p>
+                            <p>> [NET] Socket listener running on port 443...</p>
+                        </div>
+                    </section>
+
+                    <section class="block">
+                        <div class="section-title">Aktif Instance VPS</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Instance</th>
+                                    <th>IP Address</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>G-PRO-1</td>
+                                    <td>103.179.56.12</td>
+                                    <td style="color:var(--accent);">RUNNING</td>
+                                </tr>
+                                <tr>
+                                    <td>G-NANO-MAIN</td>
+                                    <td>103.179.56.88</td>
+                                    <td style="color:var(--accent);">RUNNING</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                </div>
+            </div>
+
+            <!-- TAB 2: VPS SELECTION -->
+            <div id="tab-vps" class="tab-content">
+                <section class="block">
+                    <div class="section-title">Ketersediaan Infrastructure VPS</div>
+                    <div class="vps-grid">
+                        <div class="vps-card">
+                            <div class="vps-name">G-NANO</div>
+                            <div class="vps-specs">
+                                > 1 vCPU Core<br>
+                                > 1 GB ECC Memory<br>
+                                > 20 GB NVMe Storage<br>
+                                > 1 Gbps Shared Port
+                            </div>
+                            <div class="vps-stock">Stok: 14 Cluster</div>
+                            <div class="vps-price">Rp 45.000 /bln</div>
+                            <button class="action-btn" onclick="openDeployModal('G-NANO', 45000)">Deploy Instance</button>
+                        </div>
+
+                        <div class="vps-card">
+                            <div class="vps-name">G-STANDARD</div>
+                            <div class="vps-specs">
+                                > 2 vCPU Cores<br>
+                                > 4 GB ECC Memory<br>
+                                > 60 GB NVMe Storage<br>
+                                > Dedicated Bandwidth
+                            </div>
+                            <div class="vps-stock">Stok: 8 Cluster</div>
+                            <div class="vps-price">Rp 120.000 /bln</div>
+                            <button class="action-btn" onclick="openDeployModal('G-STANDARD', 120000)">Deploy Instance</button>
+                        </div>
+
+                        <div class="vps-card">
+                            <div class="vps-name">G-PRO HIGH POWER</div>
+                            <div class="vps-specs">
+                                > 4 vCPU Cores<br>
+                                > 8 GB ECC Memory<br>
+                                > 150 GB NVMe Storage<br>
+                                > Free Support Tunnel
+                            </div>
+                            <div class="vps-stock" style="color: var(--danger); border-color: var(--danger);">Stok sisa: 2</div>
+                            <div class="vps-price">Rp 300.000 /bln</div>
+                            <button class="action-btn" onclick="openDeployModal('G-PRO', 300000)">Deploy Instance</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- TAB 3: DOMAIN MANAGEMENT -->
+            <div id="tab-domain" class="tab-content">
+                <section class="block">
+                    <div class="section-title">Pencarian WHOIS & Registrasi Domain</div>
+                    <div class="form-group">
+                        <input type="text" placeholder="Masukkan nama domain (cth: ikiygasima)" id="domain-input">
+                        <select id="domain-tld" style="max-width: 150px;">
+                            <option value=".my.id">.my.id (Rp 12k)</option>
+                            <option value=".id">.id (Rp 200k)</option>
+                            <option value=".com">.com (Rp 160k)</option>
+                            <option value=".net">.net (Rp 180k)</option>
+                        </select>
+                        <button class="action-btn" onclick="searchDomain()" style="width: 160px;">Cek Domain</button>
+                    </div>
+
+                    <div id="domain-result" style="display:none; margin-top: 15px; padding: 15px; background: var(--surface-alt); border: 1px dashed var(--border); justify-content: space-between; align-items: center;">
+                        <div>
+                            <span id="domain-name-res" style="color: var(--text-bright); font-weight: bold;"></span>
+                            <span style="color: var(--accent); margin-left: 10px;">[ TERSEDIA ]</span>
+                        </div>
+                        <button class="action-btn" onclick="buyDomain()">Registrasi Sekarang</button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- TAB 4: FINANCE & TOP UP -->
+            <div id="tab-finance" class="tab-content">
+                <div class="grid-2">
+                    <section class="block">
+                        <div class="section-title">Pengisian Saldo Console</div>
+                        <div style="font-size: 2.2rem; color: var(--text-bright); margin-bottom: 20px;" id="finance-balance-display">Rp 450.000<span style="font-size:0.9rem; color:var(--text-dim);">.00</span></div>
+                        <div class="form-group">
+                            <input type="number" placeholder="Nominal Rp..." id="topup-amount">
+                            <button class="action-btn" style="width: 120px;" onclick="processTopUp()">Top Up</button>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="action-btn" style="flex:1; background:var(--surface-alt); color:var(--text-main);" onclick="setTopUp(50000)">50K</button>
+                            <button class="action-btn" style="flex:1; background:var(--surface-alt); color:var(--text-main);" onclick="setTopUp(100000)">100K</button>
+                            <button class="action-btn" style="flex:1; background:var(--surface-alt); color:var(--text-main);" onclick="setTopUp(250000)">250K</button>
+                        </div>
+                    </section>
+
+                    <section class="block">
+                        <div class="section-title">Riwayat Mutasi</div>
+                        <table id="mutation-table">
+                            <thead>
+                                <tr>
+                                    <th>Keterangan</th>
+                                    <th>Jumlah</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Top Up Saldo via Gateway</td>
+                                    <td style="color: var(--accent);">+ Rp 450.000</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                </div>
+            </div>
+
+            <!-- TAB 5: SUPPORT TUNNEL -->
+            <div id="tab-tunnel" class="tab-content">
+                <section class="block">
+                    <div class="section-title">Configuration Support Tunnel (Port Forwarding)</div>
+                    <div class="grid-2">
+                        <div>
+                            <div class="form-group">
+                                <select id="tunnel-proto">
+                                    <option value="HTTP">Protocol: HTTP / Websocket</option>
+                                    <option value="TCP">Protocol: Direct TCP</option>
+                                    <option value="UDP">Protocol: UDP Tunnel</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <input type="number" placeholder="Port Lokal (Cth: 8080)" id="tunnel-port">
+                            </div>
+                            <button class="action-btn" style="width: 100%;" onclick="startTunnel()">Buka Tunnel Connection</button>
+                        </div>
+                        <div>
+                            <div class="terminal" id="tunnel-logs">
+                                <p>> System tunnel initialized.</p>
+                                <p>> Ready to tunnel local address...</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- TAB 6: SETTINGS -->
+            <div id="tab-settings" class="tab-content">
+                <section class="block">
+                    <div class="section-title">Pengaturan Akun & API Key</div>
+                    <div style="display:flex; flex-direction:column; gap:15px; max-width: 500px;">
+                        <div>
+                            <label style="font-size:0.8rem; color:var(--text-dim); display:block; margin-bottom:5px;">USER OWNER</label>
+                            <input type="text" value="ikiygasima" readonly>
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:var(--text-dim); display:block; margin-bottom:5px;">DOMAIN UTAMA</label>
+                            <input type="text" value="ikiygasima.my.id" readonly>
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:var(--text-dim); display:block; margin-bottom:5px;">API SECRET KEY</label>
+                            <input type="password" value="gasima_sec_9948271104829104829104" readonly>
+                        </div>
+                        <button class="action-btn" onclick="alert('Pengaturan Tersimpan!')">Simpan Perubahan</button>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL CHECKOUT VPS -->
+    <div class="modal" id="deploy-modal">
+        <div class="modal-body">
+            <div class="section-title">Konfirmasi Deployment</div>
+            <p style="font-size: 0.85rem; margin-bottom: 15px;">Target Package: <b id="modal-pkg-name" style="color:var(--text-bright);"></b></p>
+            
+            <div class="form-group" style="flex-direction: column;">
+                <label style="font-size:0.75rem; color:var(--text-dim);">PILIH OPERATING SYSTEM</label>
+                <select>
+                    <option>Ubuntu 22.04 LTS x64</option>
+                    <option>Debian 12 Bookworm</option>
+                    <option>AlmaLinux 9 OS</option>
+                </select>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:0.9rem;">
+                <span>Total Tagihan:</span>
+                <b id="modal-price" style="color:var(--text-bright);"></b>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="action-btn" style="flex:1;" onclick="confirmDeploy()">Bayar & Launch</button>
+                <button class="action-btn" style="flex:1; background:var(--surface-alt); color:var(--text-main);" onclick="closeDeployModal()">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State Management Global
+        let currentBalance = 450000;
+        let selectedPkgPrice = 0;
+        let selectedPkgName = '';
+
+        // Tab Navigation Router
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabId).classList.add('active');
+            btnElement.classList.add('active');
+        }
+
+        // Circular Gauge Animations Logic
+        const CIRCUMFERENCE = 2 * Math.PI * 35;
+        function updateRing(id, percentage) {
+            const circle = document.getElementById(id + '-ring');
+            const text = document.getElementById(id + '-val');
+            if(!circle || !text) return;
+            
+            const offset = CIRCUMFERENCE - (percentage / 100) * CIRCUMFERENCE;
+            circle.style.strokeDashoffset = offset;
+            text.innerText = percentage + '%';
+            
+            if(percentage > 85) {
+                circle.style.stroke = "var(--danger)";
+                text.style.color = "var(--danger)";
+            } else {
+                circle.style.stroke = "var(--accent)";
+                text.style.color = "var(--text-bright)";
+            }
+        }
+
+        // Dashboard Live Stats Simulation
+        setInterval(() => {
+            let cpu = Math.floor(Math.random() * 35) + 20;
+            if(Math.random() > 0.85) cpu += 35;
+            updateRing('cpu', cpu);
+            updateRing('ram', Math.floor(Math.random() * 8) + 64);
+            updateRing('disk', Math.floor(Math.random() * 25));
+            updateRing('net', Math.floor(Math.random() * 55) + 15);
+        }, 2000);
+
+        // Terminal Logging System
+        function addLog(targetId, msg) {
+            const term = document.getElementById(targetId);
+            if(!term) return;
+            const p = document.createElement('p');
+            p.innerText = msg;
+            term.appendChild(p);
+            if(term.children.length > 10) term.removeChild(term.firstChild);
+            term.scrollTop = term.scrollHeight;
+        }
+
+        // Top Up Logic
+        function setTopUp(val) { document.getElementById('topup-amount').value = val; }
+        function processTopUp() {
+            const amount = parseInt(document.getElementById('topup-amount').value);
+            if(!amount || amount <= 0) return alert('Masukkan nominal valid!');
+            
+            currentBalance += amount;
+            syncBalance();
+            addMutation('Top Up Saldo via Gateway', `+ Rp ${amount.toLocaleString('id-ID')}`, true);
+            document.getElementById('topup-amount').value = '';
+            alert('Top Up Berhasil!');
+        }
+
+        function syncBalance() {
+            const formatted = `Rp ${currentBalance.toLocaleString('id-ID')}`;
+            document.getElementById('sidebar-balance').innerText = formatted;
+            document.getElementById('finance-balance-display').innerHTML = `${formatted}<span style="font-size:0.9rem; color:var(--text-dim);">.00</span>`;
+        }
+
+        function addMutation(desc, amountText, isPositive) {
+            const tbody = document.querySelector('#mutation-table tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${desc}</td><td style="color:${isPositive ? 'var(--accent)' : 'var(--danger)'};">${amountText}</td>`;
+            tbody.insertBefore(tr, tbody.firstChild);
+        }
+
+        // Domain Search System
+        let searchedDomainName = '';
+        let searchedDomainPrice = 0;
+
+        function searchDomain() {
+            const val = document.getElementById('domain-input').value;
+            const tld = document.getElementById('domain-tld').value;
+            if(!val) return alert('Ketik nama domain terlebih dahulu!');
+            
+            const prices = { '.my.id': 12000, '.id': 200000, '.com': 160000, '.net': 18000 };
+            searchedDomainName = val + tld;
+            searchedDomainPrice = prices[tld] || 150000;
+
+            document.getElementById('domain-name-res').innerText = searchedDomainName;
+            document.getElementById('domain-result').style.display = 'flex';
+        }
+
+        function buyDomain() {
+            if(currentBalance < searchedDomainPrice) return alert('Saldo tidak mencukupi untuk pembelian domain!');
+            currentBalance -= searchedDomainPrice;
+            syncBalance();
+            addMutation(`Pembelian Domain ${searchedDomainName}`, `- Rp ${searchedDomainPrice.toLocaleString('id-ID')}`, false);
+            document.getElementById('domain-result').style.display = 'none';
+            alert(`Domain ${searchedDomainName} berhasil diregistrasi!`);
+        }
+
+        // VPS Deployment Modal System
+        function openDeployModal(name, price) {
+            selectedPkgName = name;
+            selectedPkgPrice = price;
+            document.getElementById('modal-pkg-name').innerText = name;
+            document.getElementById('modal-price').innerText = `Rp ${price.toLocaleString('id-ID')}`;
+            document.getElementById('deploy-modal').style.display = 'flex';
+        }
+
+        function closeDeployModal() { document.getElementById('deploy-modal').style.display = 'none'; }
+
+        function confirmDeploy() {
+            if(currentBalance < selectedPkgPrice) {
+                alert('Saldo tidak mencukupi! Silakan Top Up terlebih dahulu.');
+                closeDeployModal();
+                return;
+            }
+            currentBalance -= selectedPkgPrice;
+            syncBalance();
+            addMutation(`Deploy Instance ${selectedPkgName}`, `- Rp ${selectedPkgPrice.toLocaleString('id-ID')}`, false);
+            addLog('term-logs', `> [DEPLOY] Successfully deployed instance ${selectedPkgName}`);
+            closeDeployModal();
+            alert(`Instance ${selectedPkgName} berhasil disiapkan! Cek Console Logs.`);
+        }
+
+        // Tunnel Connection Simulation
+        function startTunnel() {
+            const proto = document.getElementById('tunnel-proto').value;
+            const port = document.getElementById('tunnel-port').value || '8080';
+            
+            addLog('tunnel-logs', `> Initiating ${proto} tunnel connection...`);
+            setTimeout(() => {
+                addLog('tunnel-logs', `> Secure connection established!`);
+                addLog('tunnel-logs', `> Endpoint: https://tunnel-${Math.floor(Math.random()*9000+1000)}.ikiygasima.my.id -> 127.0.0.1:${port}`);
+            }, 1000);
+        }
+
+        // Init SVG Gauge Props
+        document.querySelectorAll('.circle-progress').forEach(el => {
+            el.style.strokeDasharray = CIRCUMFERENCE;
+            el.style.strokeDashoffset = CIRCUMFERENCE;
+        });
+
+        // Initialize App
+        setTimeout(() => {
+            updateRing('cpu', 28);
+            updateRing('ram', 64);
+            updateRing('disk', 10);
+            updateRing('net', 42);
+        }, 150);
+    </script>
+</body>
+</html>
